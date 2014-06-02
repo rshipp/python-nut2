@@ -4,6 +4,9 @@ python-nut2
 This is an API overhaul of [PyNUT](https://github.com/networkupstools/nut/tree/master/scripts/python),
 a Python library to allow communication with NUT (network UPS tools) servers.
 
+[![Build Status](https://travis-ci.org/george2/python-nut2.svg?branch=master)](https://travis-ci.org/george2/python-nut2)
+[![Coverage Status](https://coveralls.io/repos/george2/python-nut2/badge.png)](https://coveralls.io/r/george2/python-nut2)
+
 ## Usage
 
 
