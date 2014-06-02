@@ -20,6 +20,14 @@ through 3.4.
 
 ## Usage
 
+```python
+from nut2 import PyNUTClient
+client = PyNUTClient()
+client.help()
+```
+
+Please note that the `nut2` API is currently **unstable** and subject to
+change. This module **will** break backwards compatability with PyNUT.
 
 ## Installation
 
