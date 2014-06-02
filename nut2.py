@@ -318,8 +318,6 @@ The result is a dictionary containing 'key->val' pairs of 'UPSName' and a list o
             raise Exception, result.replace( "\n", "" )
 
         result = self.__srv_handler.read_until( "END LIST CLIENTS\n" )
-        ups_list = {}
-
         for line in result.split( "\n" ):
             if line[:6] == "CLIENT" :
                 host, ups = line[7:].split(' ')
