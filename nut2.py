@@ -47,13 +47,13 @@ class PyNUTClient :
     __login       = None
     __password    = None
     __timeout     = None
-    __srv_handler = None
+    _srv_handler = None
 
     __version     = "1.2.2"
     __release     = "2012-02-07"
 
 
-    def __init__( self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5 ) :
+    def __init__( self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5, connect=True ) :
         """ Class initialization method
 
 host     : Host to connect (default to localhost)
@@ -76,13 +76,14 @@ timeout  : Timeout used to wait for network response
         self.__password = password
         self.__timeout  = 5
 
-        self.__connect()
+        if connect:
+            self.__connect()
 
     # Try to disconnect cleanly when class is deleted ;)
     def __del__( self ) :
         """ Class destructor method """
         try :
-            self.__srv_handler.write( "LOGOUT\n" )
+            self._srv_handler.write( "LOGOUT\n" )
         except :
             pass
 
@@ -95,17 +96,17 @@ if something goes wrong.
         if self.__debug :
             print( "[DEBUG] Connecting to host" )
 
-        self.__srv_handler = telnetlib.Telnet( self.__host, self.__port )
+        self._srv_handler = telnetlib.Telnet( self.__host, self.__port )
 
         if self.__login != None :
-            self.__srv_handler.write( "USERNAME %s\n" % self.__login )
-            result = self.__srv_handler.read_until( "\n", self.__timeout )
+            self._srv_handler.write( "USERNAME %s\n" % self.__login )
+            result = self._srv_handler.read_until( "\n", self.__timeout )
             if result[:2] != "OK" :
                 raise Exception, result.replace( "\n", "" )
 
         if self.__password != None :
-            self.__srv_handler.write( "PASSWORD %s\n" % self.__password )
-            result = self.__srv_handler.read_until( "\n", self.__timeout )
+            self._srv_handler.write( "PASSWORD %s\n" % self.__password )
+            result = self._srv_handler.read_until( "\n", self.__timeout )
             if result[:2] != "OK" :
                 raise Exception, result.replace( "\n", "" )
 
@@ -117,12 +118,12 @@ The result is a dictionary containing 'key->val' pairs of 'UPSName' and 'UPS Des
         if self.__debug :
             print( "[DEBUG] GetUPSList from server" )
 
-        self.__srv_handler.write( "LIST UPS\n" )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "LIST UPS\n" )
+        result = self._srv_handler.read_until( "\n" )
         if result != "BEGIN LIST UPS\n" :
             raise Exception, result.replace( "\n", "" )
 
-        result = self.__srv_handler.read_until( "END LIST UPS\n" )
+        result = self._srv_handler.read_until( "END LIST UPS\n" )
         ups_list = {}
 
         for line in result.split( "\n" ) :
@@ -141,13 +142,13 @@ available vars.
         if self.__debug :
             print( "[DEBUG] GetUPSVars called..." )
 
-        self.__srv_handler.write( "LIST VAR %s\n" % ups )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "LIST VAR %s\n" % ups )
+        result = self._srv_handler.read_until( "\n" )
         if result != "BEGIN LIST VAR %s\n" % ups :
             raise Exception, result.replace( "\n", "" )
 
         ups_vars   = {}
-        result     = self.__srv_handler.read_until( "END LIST VAR %s\n" % ups )
+        result     = self._srv_handler.read_until( "END LIST VAR %s\n" % ups )
         offset     = len( "VAR %s " % ups )
         end_offset = 0 - ( len( "END LIST VAR %s\n" % ups ) + 1 )
 
@@ -167,13 +168,13 @@ of the command as value
         if self.__debug :
             print( "[DEBUG] GetUPSCommands called..." )
 
-        self.__srv_handler.write( "LIST CMD %s\n" % ups )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "LIST CMD %s\n" % ups )
+        result = self._srv_handler.read_until( "\n" )
         if result != "BEGIN LIST CMD %s\n" % ups :
             raise Exception, result.replace( "\n", "" )
 
         ups_cmds   = {}
-        result     = self.__srv_handler.read_until( "END LIST CMD %s\n" % ups )
+        result     = self._srv_handler.read_until( "END LIST CMD %s\n" % ups )
         offset     = len( "CMD %s " % ups )
         end_offset = 0 - ( len( "END LIST CMD %s\n" % ups ) + 1 )
 
@@ -182,8 +183,8 @@ of the command as value
 
             # For each var we try to get the available description
             try :
-                self.__srv_handler.write( "GET CMDDESC %s %s\n" % ( ups, var ) )
-                temp = self.__srv_handler.read_until( "\n" )
+                self._srv_handler.write( "GET CMDDESC %s %s\n" % ( ups, var ) )
+                temp = self._srv_handler.read_until( "\n" )
                 if temp[:7] != "CMDDESC" :
                     raise
                 else :
@@ -204,12 +205,12 @@ The result is presented as a dictionary containing 'key->val' pairs
         if self.__debug :
             print( "[DEBUG] GetUPSVars from '%s'..." % ups )
 
-        self.__srv_handler.write( "LIST RW %s\n" % ups )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "LIST RW %s\n" % ups )
+        result = self._srv_handler.read_until( "\n" )
         if ( result != "BEGIN LIST RW %s\n" % ups ) :
             raise Exception,  result.replace( "\n",  "" )
 
-        result     = self.__srv_handler.read_until( "END LIST RW %s\n" % ups )
+        result     = self._srv_handler.read_until( "END LIST RW %s\n" % ups )
         offset     = len( "VAR %s" % ups )
         end_offset = 0 - ( len( "END LIST RW %s\n" % ups ) + 1 )
         rw_vars    = {}
@@ -232,8 +233,8 @@ The variable must be a writable value (cf GetRWVars) and you must have the prope
 rights to set it (maybe login/password).
         """
 
-        self.__srv_handler.write( "SET VAR %s %s %s\n" % ( ups, var, value ) )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "SET VAR %s %s %s\n" % ( ups, var, value ) )
+        result = self._srv_handler.read_until( "\n" )
         if ( result == "OK\n" ) :
             return( "OK" )
         else :
@@ -248,8 +249,8 @@ Returns OK on success or raises an error
         if self.__debug :
             print( "[DEBUG] RunUPSCommand called..." )
 
-        self.__srv_handler.write( "INSTCMD %s %s\n" % ( ups, command ) )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "INSTCMD %s %s\n" % ( ups, command ) )
+        result = self._srv_handler.read_until( "\n" )
         if ( result == "OK\n" ) :
             return( "OK" )
         else :
@@ -264,15 +265,15 @@ Returns OK on success or raises an error
         if self.__debug :
             print( "[DEBUG] MASTER called..." )
 
-        self.__srv_handler.write( "MASTER %s\n" % ups )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "MASTER %s\n" % ups )
+        result = self._srv_handler.read_until( "\n" )
         if ( result != "OK MASTER-GRANTED\n" ) :
             raise Exception, ( "Master level function are not available", "" )
 
         if self.__debug :
             print( "[DEBUG] FSD called..." )
-        self.__srv_handler.write( "FSD %s\n" % ups )
-        result = self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "FSD %s\n" % ups )
+        result = self._srv_handler.read_until( "\n" )
         if ( result == "OK FSD-SET\n" ) :
             return( "OK" )
         else :
@@ -285,8 +286,8 @@ Returns OK on success or raises an error
         if self.__debug :
             print( "[DEBUG] HELP called..." )
 
-        self.__srv_handler.write( "HELP\n")
-        return self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "HELP\n")
+        return self._srv_handler.read_until( "\n" )
 
     def ver(self) :
         """ Send VER command
@@ -295,8 +296,8 @@ Returns OK on success or raises an error
         if self.__debug :
             print( "[DEBUG] VER called..." )
 
-        self.__srv_handler.write( "VER\n")
-        return self.__srv_handler.read_until( "\n" )
+        self._srv_handler.write( "VER\n")
+        return self._srv_handler.read_until( "\n" )
 
     def ListClients( self, ups = None ) :
         """ Returns the list of connected clients from the NUT server
@@ -310,14 +311,16 @@ The result is a dictionary containing 'key->val' pairs of 'UPSName' and a list o
             raise Exception, "%s is not a valid UPS" % ups
 
         if ups:
-            self.__srv_handler.write( "LIST CLIENTS %s\n" % ups)
+            self._srv_handler.write( "LIST CLIENTS %s\n" % ups)
         else:
-            self.__srv_handler.write( "LIST CLIENTS\n" )
-        result = self.__srv_handler.read_until( "\n" )
+            self._srv_handler.write( "LIST CLIENTS\n" )
+        result = self._srv_handler.read_until( "\n" )
         if result != "BEGIN LIST CLIENTS\n" :
             raise Exception, result.replace( "\n", "" )
 
-        result = self.__srv_handler.read_until( "END LIST CLIENTS\n" )
+        result = self._srv_handler.read_until( "END LIST CLIENTS\n" )
+        ups_list = {}
+
         for line in result.split( "\n" ):
             if line[:6] == "CLIENT" :
                 host, ups = line[7:].split(' ')

@@ -9,6 +9,7 @@ a Python library to allow communication with NUT (network UPS tools) servers.
 
 ## Installation
 
+    python setup.py install
 
 ## PyNUT
 
