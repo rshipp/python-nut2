@@ -48,10 +48,13 @@
 #
 
 import telnetlib
+import logging
 
 
 __version__ = '2.0.0'
 __all__ = ['PyNUTError', 'PyNUTClient']
+
+logging.basicConfig(level=logging.WARNING, format="[%(levelname)s] %(message)s")
 
 
 class PyNUTError(Exception):
@@ -72,12 +75,13 @@ class PyNUTClient(object):
                    on console, default to False)
         timeout  : Timeout used to wait for network response
         """
-        self._debug = debug
+        if debug:
+            # Print DEBUG messages to the console.
+            logging.getLogger().setLevel(logging.DEBUG)
 
-        if self._debug:
-            print("[DEBUG] Class initialization...")
-            print("[DEBUG]  -> Host = %s (port %s)" % (host, port))
-            print("[DEBUG]  -> Login = '%s' / '%s'" % (login, password))
+        logging.debug("Class initialization...")
+        logging.debug(" -> Host = %s (port %s)" % (host, port))
+        logging.debug(" -> Login = '%s' / '%s'" % (login, password))
 
         self._host = host
         self._port = port
@@ -112,8 +116,7 @@ class PyNUTClient(object):
         If login/pass was specified, the class tries to authenticate.
         An error is raised if something goes wrong.
         """
-        if self._debug:
-            print("[DEBUG] Connecting to host")
+        logging.debug("Connecting to host")
 
         self._srv_handler = telnetlib.Telnet(self._host, self._port)
 
@@ -135,8 +138,7 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and 'UPS Description'.
         """
-        if self._debug:
-            print("[DEBUG] list_ups from server")
+        logging.debug("list_ups from server")
 
         self._srv_handler.write("LIST UPS\n")
         result = self._srv_handler.read_until("\n")
@@ -159,8 +161,7 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of all
         available vars.
         """
-        if self._debug:
-            print("[DEBUG] list_vars called...")
+        logging.debug("list_vars called...")
 
         self._srv_handler.write("LIST VAR %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -185,8 +186,7 @@ class PyNUTClient(object):
         The result is a dict object with command name as key and a description
         of the command as value.
         """
-        if self._debug:
-            print("[DEBUG] list_commands called...")
+        logging.debug("list_commands called...")
 
         self._srv_handler.write("LIST CMD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -223,8 +223,7 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and a list of clients.
         """
-        if self._debug:
-            print("[DEBUG] list_clients from server")
+        logging.debug("list_clients from server")
 
         if ups and (ups not in self.list_ups()):
             raise PyNUTError("%s is not a valid UPS" % ups)
@@ -256,8 +255,7 @@ class PyNUTClient(object):
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
-        if self._debug:
-            print("[DEBUG] list_vars from '%s'..." % ups)
+        logging.debug("list_vars from '%s'..." % ups)
 
         self._srv_handler.write("LIST RW %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -300,8 +298,7 @@ class PyNUTClient(object):
         Returns OK on success or raises an error.
         """
 
-        if self._debug:
-            print("[DEBUG] run_command called...")
+        logging.debug("run_command called...")
 
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
         result = self._srv_handler.read_until("\n")
@@ -316,16 +313,14 @@ class PyNUTClient(object):
         Returns OK on success or raises an error.
         """
 
-        if self._debug:
-            print("[DEBUG] MASTER called...")
+        logging.debug("MASTER called...")
 
         self._srv_handler.write("MASTER %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if result != "OK MASTER-GRANTED\n":
             raise PyNUTError(("Master level function are not available", ""))
 
-        if self._debug:
-            print("[DEBUG] FSD called...")
+        logging.debug("FSD called...")
         self._srv_handler.write("FSD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if result == "OK FSD-SET\n":
@@ -336,8 +331,7 @@ class PyNUTClient(object):
     def help(self):
         """Send HELP command."""
 
-        if self._debug:
-            print("[DEBUG] HELP called...")
+        logging.debug("HELP called...")
 
         self._srv_handler.write("HELP\n")
         return self._srv_handler.read_until("\n")
@@ -345,8 +339,7 @@ class PyNUTClient(object):
     def ver(self):
         """Send VER command."""
 
-        if self._debug:
-            print("[DEBUG] VER called...")
+        logging.debug("VER called...")
 
         self._srv_handler.write("VER\n")
         return self._srv_handler.read_until("\n")
