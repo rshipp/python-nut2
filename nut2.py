@@ -100,6 +100,12 @@ class PyNUTClient(object):
             finally:
                 self._srv_handler.close()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_t, exc_v, trace):
+        self.__del__()
+
     def _connect(self):
         """Connects to the defined server.
 
