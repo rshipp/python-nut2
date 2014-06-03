@@ -1,4 +1,4 @@
-python-nut2
+python-nut2 [![Build Status](https://travis-ci.org/george2/python-nut2.svg?branch=master)](https://travis-ci.org/george2/python-nut2) [![Coverage Status](https://coveralls.io/repos/george2/python-nut2/badge.png)](https://coveralls.io/r/george2/python-nut2)
 ===========
 
 This is an API overhaul of [PyNUT](https://github.com/networkupstools/nut/tree/master/scripts/python),
@@ -8,15 +8,10 @@ servers.
 **Note**: This is an unofficial project, and is in no way supported or
 endorsed by the [Network UPS Tools developers](https://github.com/networkupstools).
 
-## Build Status
+## Requirements
 
-This repository uses [Travis](https://travis-ci.org/) and
-[Coveralls](https://coveralls.io/) to automate running unit tests and
-coverage reports, respectively. The tests currently run on Python 2.6
-through 3.4.
-
-[![Build Status](https://travis-ci.org/george2/python-nut2.svg?branch=master)](https://travis-ci.org/george2/python-nut2)
-[![Coverage Status](https://coveralls.io/repos/george2/python-nut2/badge.png)](https://coveralls.io/r/george2/python-nut2)
+The module itself requires only Python (known to work with versions 2.6 through
+3.4). If you wish to run the tests, do `pip install -r requirements-testing.txt`.
 
 ## Usage
 
