@@ -35,6 +35,9 @@
 # 2012-02-07 René Martín Rodríguez <rmrodri@ull.es> - Version 1.2.2
 #            Added support for LIST CLIENTS command
 #
+# 2014-06-02 george2 - Version 2.0.0
+#            Refactored the API, broke backwards compatability.
+#
 
 import telnetlib
 
@@ -79,9 +82,8 @@ class PyNUTClient(object):
         if connect:
             self.__connect()
 
-    # Try to disconnect cleanly when class is deleted ;)
     def __del__(self):
-        """Class destructor method."""
+        """Try to disconnect cleanly when class is deleted."""
         try :
             self._srv_handler.write("LOGOUT\n")
         except :
@@ -110,13 +112,13 @@ class PyNUTClient(object):
             if result[:2] != "OK" :
                 raise Exception(result.replace("\n", ""))
 
-    def GetUPSList(self):
+    def list_ups(self):
         """Returns the list of available UPS from the NUT server.
 
         The result is a dictionary containing 'key->val' pairs of 'UPSName' and 'UPS Description'
         """
         if self.__debug :
-            print("[DEBUG] GetUPSList from server")
+            print("[DEBUG] list_ups from server")
 
         self._srv_handler.write("LIST UPS\n")
         result = self._srv_handler.read_until("\n")
@@ -124,23 +126,23 @@ class PyNUTClient(object):
             raise Exception(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST UPS\n")
-        ups_list = {}
+        ups_dict = {}
 
         for line in result.split("\n"):
             if line[:3] == "UPS" :
                 ups, desc = line[4:-1].split('"')
-                ups_list[ ups.replace(" ", "") ] = desc
+                ups_dict[ ups.replace(" ", "") ] = desc
 
-        return(ups_list)
+        return(ups_dict)
 
-    def GetUPSVars(self, ups=""):
+    def list_vars(self, ups=""):
         """Get all available vars from the specified UPS.
 
         The result is a dictionary containing 'key->val' pairs of all
         available vars.
         """
         if self.__debug :
-            print("[DEBUG] GetUPSVars called...")
+            print("[DEBUG] list_vars called...")
 
         self._srv_handler.write("LIST VAR %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -159,14 +161,14 @@ class PyNUTClient(object):
 
         return(ups_vars)
 
-    def GetUPSCommands(self, ups=""):
+    def list_commands(self, ups=""):
         """Get all available commands for the specified UPS.
 
         The result is a dict object with command name as key and a description
         of the command as value.
         """
         if self.__debug :
-            print("[DEBUG] GetUPSCommands called...")
+            print("[DEBUG] list_commands called...")
 
         self._srv_handler.write("LIST CMD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -197,14 +199,14 @@ class PyNUTClient(object):
 
         return(ups_cmds)
 
-    def GetRWVars(self,  ups=""):
+    def list_rw_vars(self,  ups=""):
         """Get a list of all writable vars from the selected UPS.
 
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
         if self.__debug :
-            print("[DEBUG] GetUPSVars from '%s'..." % ups)
+            print("[DEBUG] list_vars from '%s'..." % ups)
 
         self._srv_handler.write("LIST RW %s\n" % ups)
         result = self._srv_handler.read_until("\n")
@@ -227,10 +229,10 @@ class PyNUTClient(object):
 
         return(rw_vars)
 
-    def SetRWVar(self, ups="", var="", value=""):
+    def set_var(self, ups="", var="", value=""):
         """Set a variable to the specified value on selected UPS.
 
-        The variable must be a writable value (cf GetRWVars) and you
+        The variable must be a writable value (cf list_rw_vars) and you
         must have the proper rights to set it (maybe login/password).
         """
 
@@ -241,14 +243,14 @@ class PyNUTClient(object):
         else :
             raise Exception(result)
 
-    def RunUPSCommand(self, ups="", command=""):
+    def run_command(self, ups="", command=""):
         """Send a command to the specified UPS.
 
         Returns OK on success or raises an error.
         """
 
         if self.__debug :
-            print("[DEBUG] RunUPSCommand called...")
+            print("[DEBUG] run_command called...")
 
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
         result = self._srv_handler.read_until("\n")
@@ -257,7 +259,7 @@ class PyNUTClient(object):
         else :
             raise Exception(result.replace("\n", ""))
 
-    def FSD(self, ups="") :
+    def fsd(self, ups="") :
         """Send FSD command.
 
         Returns OK on success or raises an error.
@@ -298,16 +300,16 @@ class PyNUTClient(object):
         self._srv_handler.write("VER\n")
         return self._srv_handler.read_until("\n")
 
-    def ListClients(self, ups = None):
+    def list_clients(self, ups = None):
         """Returns the list of connected clients from the NUT server.
 
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and a list of clients
         """
         if self.__debug :
-            print("[DEBUG] ListClients from server")
+            print("[DEBUG] list_clients from server")
 
-        if ups and (ups not in self.GetUPSList()):
+        if ups and (ups not in self.list_ups()):
             raise Exception("%s is not a valid UPS" % ups)
 
         if ups:
@@ -319,14 +321,14 @@ class PyNUTClient(object):
             raise Exception(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CLIENTS\n")
-        ups_list = {}
+        ups_dict = {}
 
         for line in result.split("\n"):
             if line[:6] == "CLIENT" :
                 host, ups = line[7:].split(' ')
                 ups.replace(' ', '')
-                if not ups in ups_list:
-                    ups_list[ups] = []
-                ups_list[ups].append(host)
+                if not ups in ups_dict:
+                    ups_dict[ups] = []
+                ups_dict[ups].append(host)
 
-        return(ups_list)
+        return(ups_dict)
