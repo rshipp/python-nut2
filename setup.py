@@ -1,6 +1,8 @@
 import os
 from setuptools import setup
 
+from nut2 import __version__
+
 README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 
 # allow setup.py to be run from any path
@@ -8,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='nut2',
-    version='2.0.0',
+    version=__version__,
     modules=['nut2'],
     include_package_data=True,
     install_requires=[],
