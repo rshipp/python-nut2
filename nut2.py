@@ -80,8 +80,8 @@ class PyNUTClient(object):
             logging.getLogger().setLevel(logging.DEBUG)
 
         logging.debug("Class initialization...")
-        logging.debug(" -> Host = %s (port %s)" % (host, port))
-        logging.debug(" -> Login = '%s' / '%s'" % (login, password))
+        logging.debug(" -> Host = %s (port %s)", host, port)
+        logging.debug(" -> Login = '%s' / '%s'", login, password)
 
         self._host = host
         self._port = port
@@ -255,7 +255,7 @@ class PyNUTClient(object):
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
-        logging.debug("list_vars from '%s'..." % ups)
+        logging.debug("list_vars from '%s'...", ups)
 
         self._srv_handler.write("LIST RW %s\n" % ups)
         result = self._srv_handler.read_until("\n")
