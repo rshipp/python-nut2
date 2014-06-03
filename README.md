@@ -27,7 +27,8 @@ client.help()
 ```
 
 Please note that the `nut2` API is currently **unstable** and subject to
-change. This module **will** break backwards compatability with PyNUT.
+change. This module has intentionally and completely broken backwards
+compatability with PyNUT.
 
 ## Installation
 
