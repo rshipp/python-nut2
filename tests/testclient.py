@@ -55,7 +55,8 @@ class TestClient(unittest.TestCase):
 
     def test_connect_credentials(self):
         try:
-            PyNUTClient(login=self.valid, password=self.valid)
+            PyNUTClient(login=self.valid, password=self.valid,
+                    debug=True)
         except TypeError:
             pass
         except PyNUTError:

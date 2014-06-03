@@ -124,13 +124,13 @@ class PyNUTClient(object):
         if self._login != None:
             self._srv_handler.write("USERNAME %s\n" % self._login)
             result = self._srv_handler.read_until("\n", self._timeout)
-            if not result.startswith("OK"):
+            if not result == "OK\n":
                 raise PyNUTError(result.replace("\n", ""))
 
         if self._password != None:
             self._srv_handler.write("PASSWORD %s\n" % self._password)
             result = self._srv_handler.read_until("\n", self._timeout)
-            if not result.startswith("OK"):
+            if not result == "OK\n":
                 raise PyNUTError(result.replace("\n", ""))
 
     def list_ups(self):
