@@ -1,10 +1,12 @@
 """A simple mock NUT server for testing the Python client."""
 
 class MockServer(object):
-    def __init__(self, host=None, port=None, broken=False, ok=True):
+    def __init__(self, host=None, port=None, broken=True, ok=True,
+            broken_username=False):
         self.valid = "test"
         self.broken = broken
         self.ok = ok
+        self.broken_username = broken_username
 
     def write(self, text):
         self.command = text
@@ -17,7 +19,9 @@ class MockServer(object):
         pass
 
     def run_command(self):
-        if self.broken == True:
+        if self.broken and not self.broken_username and self.command == "USERNAME %s\n" % self.valid:
+            return 'OK\n'
+        elif self.broken:
             return 'ERR\n'
         elif self.command == "HELP\n":
             return 'Commands: HELP VER GET LIST SET INSTCMD LOGIN LOGOUT USERNAME PASSWORD STARTTLS\n'

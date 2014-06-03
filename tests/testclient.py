@@ -12,11 +12,12 @@ class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.client = PyNUTClient(connect=False, debug=True)
-        self.client._srv_handler = MockServer()
+        self.client._srv_handler = MockServer(broken=False)
         self.broken_client = PyNUTClient(connect=False, debug=True)
         self.broken_client._srv_handler = MockServer(broken=True)
         self.not_ok_client = PyNUTClient(connect=False, debug=True)
-        self.not_ok_client._srv_handler = MockServer(ok=False)
+        self.not_ok_client._srv_handler = MockServer(ok=False,
+                broken=False)
         self.valid = "test"
         self.invalid = "does_not_exist"
         self.valid_ups_name = "Test UPS 1"
@@ -46,10 +47,27 @@ class TestClient(unittest.TestCase):
         except Exception:
             assert(False)
 
+    def test_connect_broken(self):
+        telnetlib.Telnet = MockServer
+        client = PyNUTClient(login=self.valid, password=self.valid,
+                connect=False)
+        self.assertRaises(PyNUTError, client._connect)
+
     def test_connect_credentials(self):
-        # FIXME: Mock the __gettem__ call, so this can be fully tested.
         try:
             PyNUTClient(login=self.valid, password=self.valid)
+        except TypeError:
+            pass
+        except PyNUTError:
+            pass
+        except Exception:
+            assert(False)
+
+    def test_connect_credentials_username_ok(self):
+        try:
+            telnetlib.Telnet = MockServer
+            PyNUTClient(login=self.valid, password=self.valid,
+                    debug=True)
         except TypeError:
             pass
         except PyNUTError:
