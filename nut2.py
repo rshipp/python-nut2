@@ -276,11 +276,12 @@ class PyNUTClient(object):
         The variable must be a writable value (cf list_rw_vars) and you
         must have the proper rights to set it (maybe login/password).
         """
+        logging.debug("set_var '%s' from '%s' to '%s'", var, ups, value)
 
         self._srv_handler.write("SET VAR %s %s %s\n" % (ups, var, value))
         result = self._srv_handler.read_until("\n")
         if result == "OK\n":
-            return "OK"
+            return True
         else:
             raise PyNUTError(result)
 
@@ -295,7 +296,7 @@ class PyNUTClient(object):
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
         result = self._srv_handler.read_until("\n")
         if result == "OK\n":
-            return "OK"
+            return True
         else:
             raise PyNUTError(result.replace("\n", ""))
 
@@ -316,7 +317,7 @@ class PyNUTClient(object):
         self._srv_handler.write("FSD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if result == "OK FSD-SET\n":
-            return "OK"
+            return True
         else:
             raise PyNUTError(result.replace("\n", ""))
 

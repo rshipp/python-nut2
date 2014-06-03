@@ -118,8 +118,7 @@ class TestClient(unittest.TestCase):
         self.assertRaises(PyNUTError, self.client.list_rw_vars, self.invalid)
 
     def test_set_rw_var_valid(self):
-        self.assertEquals(self.client.set_var(self.valid, self.valid,
-                    self.valid), 'OK')
+        assert(self.client.set_var(self.valid, self.valid, self.valid))
 
     def test_set_rw_var_invalid(self):
         self.assertRaises(PyNUTError, self.client.set_var, self.invalid,
@@ -130,8 +129,7 @@ class TestClient(unittest.TestCase):
                 self.valid, self.valid)
 
     def test_run_ups_command_valid(self):
-        self.assertEquals(self.client.run_command(self.valid,
-                    self.valid), 'OK')
+        assert(self.client.run_command(self.valid, self.valid))
 
     def test_run_ups_command_invalid(self):
         self.assertRaises(PyNUTError, self.client.run_command, self.invalid,
@@ -142,7 +140,7 @@ class TestClient(unittest.TestCase):
                     self.valid)
 
     def test_fsd_valid_ups(self):
-        self.assertEquals(self.client.fsd(self.valid), 'OK')
+        assert(self.client.fsd(self.valid))
 
     def test_fsd_invalid_ups(self):
         self.assertRaises(PyNUTError, self.client.fsd, self.invalid)
