@@ -67,7 +67,7 @@ class PyNUTClient(object):
         """
         self.__debug = debug
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] Class initialization...")
             print("[DEBUG]  -> Host  = %s (port %s)" % (host, port))
             print("[DEBUG]  -> Login = '%s' / '%s'" % (login, password))
@@ -83,9 +83,9 @@ class PyNUTClient(object):
 
     def __del__(self):
         """Try to disconnect cleanly when class is deleted."""
-        try :
+        try:
             self._srv_handler.write("LOGOUT\n")
-        except :
+        except:
             pass
 
     def __connect(self):
@@ -93,21 +93,21 @@ class PyNUTClient(object):
         If login/pass was specified, the class tries to authenticate. An
         error is raised if something goes wrong.
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] Connecting to host")
 
         self._srv_handler = telnetlib.Telnet(self.__host, self.__port)
 
-        if self.__login != None :
+        if self.__login != None:
             self._srv_handler.write("USERNAME %s\n" % self.__login)
             result = self._srv_handler.read_until("\n", self.__timeout)
-            if result[:2] != "OK" :
+            if result[:2] != "OK":
                 raise Exception(result.replace("\n", ""))
 
-        if self.__password != None :
+        if self.__password != None:
             self._srv_handler.write("PASSWORD %s\n" % self.__password)
             result = self._srv_handler.read_until("\n", self.__timeout)
-            if result[:2] != "OK" :
+            if result[:2] != "OK":
                 raise Exception(result.replace("\n", ""))
 
     def list_ups(self):
@@ -115,19 +115,19 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and 'UPS Description'.
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] list_ups from server")
 
         self._srv_handler.write("LIST UPS\n")
         result = self._srv_handler.read_until("\n")
-        if result != "BEGIN LIST UPS\n" :
+        if result != "BEGIN LIST UPS\n":
             raise Exception(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST UPS\n")
         ups_dict = {}
 
         for line in result.split("\n"):
-            if line[:3] == "UPS" :
+            if line[:3] == "UPS":
                 ups, desc = line[4:-1].split('"')
                 ups_dict[ ups.replace(" ", "") ] = desc
 
@@ -138,12 +138,12 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of all
         available vars.
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] list_vars called...")
 
         self._srv_handler.write("LIST VAR %s\n" % ups)
         result = self._srv_handler.read_until("\n")
-        if result != "BEGIN LIST VAR %s\n" % ups :
+        if result != "BEGIN LIST VAR %s\n" % ups:
             raise Exception(result.replace("\n", ""))
 
         ups_vars   = {}
@@ -163,12 +163,12 @@ class PyNUTClient(object):
         The result is a dict object with command name as key and a description
         of the command as value.
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] list_commands called...")
 
         self._srv_handler.write("LIST CMD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
-        if result != "BEGIN LIST CMD %s\n" % ups :
+        if result != "BEGIN LIST CMD %s\n" % ups:
             raise Exception(result.replace("\n", ""))
 
         ups_cmds   = {}
@@ -180,15 +180,15 @@ class PyNUTClient(object):
             var  = current[ offset: ].split('"')[0].replace(" ", "")
 
             # For each var we try to get the available description
-            try :
+            try:
                 self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, var))
                 temp = self._srv_handler.read_until("\n")
-                if temp[:7] != "CMDDESC" :
-                    raise
-                else :
+                if temp[:7] != "CMDDESC":
+                    raise Exception
+                else:
                     off  = len("CMDDESC %s %s " % (ups, var))
                     desc = temp[off:-1].split('"')[1]
-            except :
+            except:
                 desc = var
 
             ups_cmds[ var ] = desc
@@ -200,7 +200,7 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and a list of clients
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] list_clients from server")
 
         if ups and (ups not in self.list_ups()):
@@ -211,14 +211,14 @@ class PyNUTClient(object):
         else:
             self._srv_handler.write("LIST CLIENTS\n")
         result = self._srv_handler.read_until("\n")
-        if result != "BEGIN LIST CLIENTS\n" :
+        if result != "BEGIN LIST CLIENTS\n":
             raise Exception(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CLIENTS\n")
         ups_dict = {}
 
         for line in result.split("\n"):
-            if line[:6] == "CLIENT" :
+            if line[:6] == "CLIENT":
                 host, ups = line[7:].split(' ')
                 ups.replace(' ', '')
                 if not ups in ups_dict:
@@ -232,7 +232,7 @@ class PyNUTClient(object):
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] list_vars from '%s'..." % ups)
 
         self._srv_handler.write("LIST RW %s\n" % ups)
@@ -245,13 +245,13 @@ class PyNUTClient(object):
         end_offset = 0 - (len("END LIST RW %s\n" % ups) + 1)
         rw_vars    = {}
 
-        try :
+        try:
             for current in result[:end_offset].split("\n"):
                 var  = current[ offset: ].split('"')[0].replace(" ", "")
                 data = current[ offset: ].split('"')[1]
                 rw_vars[ var ] = data
 
-        except :
+        except:
             pass
 
         return(rw_vars)
@@ -266,7 +266,7 @@ class PyNUTClient(object):
         result = self._srv_handler.read_until("\n")
         if (result == "OK\n"):
             return("OK")
-        else :
+        else:
             raise Exception(result)
 
     def run_command(self, ups="", command=""):
@@ -274,22 +274,22 @@ class PyNUTClient(object):
         Returns OK on success or raises an error.
         """
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] run_command called...")
 
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
         result = self._srv_handler.read_until("\n")
         if (result == "OK\n"):
             return("OK")
-        else :
+        else:
             raise Exception(result.replace("\n", ""))
 
-    def fsd(self, ups="") :
+    def fsd(self, ups=""):
         """Send FSD command.
         Returns OK on success or raises an error.
         """
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] MASTER called...")
 
         self._srv_handler.write("MASTER %s\n" % ups)
@@ -297,28 +297,28 @@ class PyNUTClient(object):
         if (result != "OK MASTER-GRANTED\n"):
             raise Exception(("Master level function are not available", ""))
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] FSD called...")
         self._srv_handler.write("FSD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if (result == "OK FSD-SET\n"):
             return("OK")
-        else :
+        else:
             raise Exception(result.replace("\n", ""))
 
-    def help(self) :
+    def help(self):
         """Send HELP command."""
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] HELP called...")
 
         self._srv_handler.write("HELP\n")
         return self._srv_handler.read_until("\n")
 
-    def ver(self) :
+    def ver(self):
         """Send VER command."""
 
-        if self.__debug :
+        if self.__debug:
             print("[DEBUG] VER called...")
 
         self._srv_handler.write("VER\n")
