@@ -13,6 +13,9 @@ class MockServer(object):
     def read_until(self, text=None, timeout=None):
         return self.run_command().split(text)[0] + text
 
+    def close(self):
+        pass
+
     def run_command(self):
         if self.broken == True:
             return 'ERR\n'

@@ -91,12 +91,14 @@ class PyNUTClient(object):
 
     def __del__(self):
         # Try to disconnect cleanly when class is deleted.
-        try:
-            self._srv_handler.write("LOGOUT\n")
-        except telnetlib.socket.error:
-            pass
-        finally:
-            self._srv_handler.close()
+        if self._srv_handler:
+            try:
+                self._srv_handler.write("LOGOUT\n")
+            except telnetlib.socket.error:
+                # The socket is already disconnected.
+                pass
+            finally:
+                self._srv_handler.close()
 
     def _connect(self):
         """Connects to the defined server.
