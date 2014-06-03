@@ -54,6 +54,7 @@ class PyNUTClient(object):
 
     def __init__(self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5, connect=True):
         """Class initialization method.
+
         host     : Host to connect (defaults to 127.0.0.1)
         port     : Port where NUT listens for connections (defaults to 3493)
         login    : Login used to connect to NUT server (defaults to None for no authentication)
@@ -87,6 +88,7 @@ class PyNUTClient(object):
 
     def _connect(self):
         """Connects to the defined server.
+
         If login/pass was specified, the class tries to authenticate. An
         error is raised if something goes wrong.
         """
@@ -109,6 +111,7 @@ class PyNUTClient(object):
 
     def list_ups(self):
         """Returns the list of available UPS from the NUT server.
+
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and 'UPS Description'.
         """
@@ -132,6 +135,7 @@ class PyNUTClient(object):
 
     def list_vars(self, ups=""):
         """Get all available vars from the specified UPS.
+
         The result is a dictionary containing 'key->val' pairs of all
         available vars.
         """
@@ -157,6 +161,7 @@ class PyNUTClient(object):
 
     def list_commands(self, ups=""):
         """Get all available commands for the specified UPS.
+
         The result is a dict object with command name as key and a description
         of the command as value.
         """
@@ -194,8 +199,9 @@ class PyNUTClient(object):
 
     def list_clients(self, ups = None):
         """Returns the list of connected clients from the NUT server.
+
         The result is a dictionary containing 'key->val' pairs of
-        'UPSName' and a list of clients
+        'UPSName' and a list of clients.
         """
         if self._debug:
             print("[DEBUG] list_clients from server")
@@ -226,6 +232,7 @@ class PyNUTClient(object):
 
     def list_rw_vars(self,  ups=""):
         """Get a list of all writable vars from the selected UPS.
+
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
@@ -255,6 +262,7 @@ class PyNUTClient(object):
 
     def set_var(self, ups="", var="", value=""):
         """Set a variable to the specified value on selected UPS.
+
         The variable must be a writable value (cf list_rw_vars) and you
         must have the proper rights to set it (maybe login/password).
         """
@@ -268,6 +276,7 @@ class PyNUTClient(object):
 
     def run_command(self, ups="", command=""):
         """Send a command to the specified UPS.
+
         Returns OK on success or raises an error.
         """
 
@@ -283,6 +292,7 @@ class PyNUTClient(object):
 
     def fsd(self, ups=""):
         """Send FSD command.
+
         Returns OK on success or raises an error.
         """
 
