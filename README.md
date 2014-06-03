@@ -19,11 +19,12 @@ The module itself requires only Python (known to work with versions 2.6 through
 from nut2 import PyNUTClient
 client = PyNUTClient()
 client.help()
+client.list_ups()
+client.list_vars("My_UPS")
 ```
 
-Please note that the `nut2` API is currently **unstable** and subject to
-change. This module has intentionally and completely broken backwards
-compatibility with PyNUT.
+Please note that this module has completely and intentionally broken
+backwards compatibility with PyNUT 1.X.
 
 ## Installation
 
