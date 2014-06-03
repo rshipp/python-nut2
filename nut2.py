@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#   Copyright (C) 2008 David Goncalves <david@lestat.st>
+#   Copyright (C) 2014 george2
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@
 #
 
 import telnetlib
+
+class PyNUTError(Exception):
+    """Base class for custom exceptions."""
 
 class PyNUTClient(object):
     """Abstraction class to access NUT (Network UPS Tools) server."""
@@ -102,13 +105,13 @@ class PyNUTClient(object):
             self._srv_handler.write("USERNAME %s\n" % self.__login)
             result = self._srv_handler.read_until("\n", self.__timeout)
             if result[:2] != "OK":
-                raise Exception(result.replace("\n", ""))
+                raise PyNUTError(result.replace("\n", ""))
 
         if self.__password != None:
             self._srv_handler.write("PASSWORD %s\n" % self.__password)
             result = self._srv_handler.read_until("\n", self.__timeout)
             if result[:2] != "OK":
-                raise Exception(result.replace("\n", ""))
+                raise PyNUTError(result.replace("\n", ""))
 
     def list_ups(self):
         """Returns the list of available UPS from the NUT server.
@@ -121,7 +124,7 @@ class PyNUTClient(object):
         self._srv_handler.write("LIST UPS\n")
         result = self._srv_handler.read_until("\n")
         if result != "BEGIN LIST UPS\n":
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST UPS\n")
         ups_dict = {}
@@ -144,7 +147,7 @@ class PyNUTClient(object):
         self._srv_handler.write("LIST VAR %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if result != "BEGIN LIST VAR %s\n" % ups:
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
         ups_vars   = {}
         result     = self._srv_handler.read_until("END LIST VAR %s\n" % ups)
@@ -169,7 +172,7 @@ class PyNUTClient(object):
         self._srv_handler.write("LIST CMD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if result != "BEGIN LIST CMD %s\n" % ups:
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
         ups_cmds   = {}
         result     = self._srv_handler.read_until("END LIST CMD %s\n" % ups)
@@ -184,7 +187,7 @@ class PyNUTClient(object):
                 self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, var))
                 temp = self._srv_handler.read_until("\n")
                 if temp[:7] != "CMDDESC":
-                    raise Exception
+                    raise PyNUTError
                 else:
                     off  = len("CMDDESC %s %s " % (ups, var))
                     desc = temp[off:-1].split('"')[1]
@@ -204,7 +207,7 @@ class PyNUTClient(object):
             print("[DEBUG] list_clients from server")
 
         if ups and (ups not in self.list_ups()):
-            raise Exception("%s is not a valid UPS" % ups)
+            raise PyNUTError("%s is not a valid UPS" % ups)
 
         if ups:
             self._srv_handler.write("LIST CLIENTS %s\n" % ups)
@@ -212,7 +215,7 @@ class PyNUTClient(object):
             self._srv_handler.write("LIST CLIENTS\n")
         result = self._srv_handler.read_until("\n")
         if result != "BEGIN LIST CLIENTS\n":
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CLIENTS\n")
         ups_dict = {}
@@ -238,7 +241,7 @@ class PyNUTClient(object):
         self._srv_handler.write("LIST RW %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if (result != "BEGIN LIST RW %s\n" % ups):
-            raise Exception(result.replace("\n",  ""))
+            raise PyNUTError(result.replace("\n",  ""))
 
         result     = self._srv_handler.read_until("END LIST RW %s\n" % ups)
         offset     = len("VAR %s" % ups)
@@ -267,7 +270,7 @@ class PyNUTClient(object):
         if (result == "OK\n"):
             return("OK")
         else:
-            raise Exception(result)
+            raise PyNUTError(result)
 
     def run_command(self, ups="", command=""):
         """Send a command to the specified UPS.
@@ -282,7 +285,7 @@ class PyNUTClient(object):
         if (result == "OK\n"):
             return("OK")
         else:
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
     def fsd(self, ups=""):
         """Send FSD command.
@@ -295,7 +298,7 @@ class PyNUTClient(object):
         self._srv_handler.write("MASTER %s\n" % ups)
         result = self._srv_handler.read_until("\n")
         if (result != "OK MASTER-GRANTED\n"):
-            raise Exception(("Master level function are not available", ""))
+            raise PyNUTError(("Master level function are not available", ""))
 
         if self.__debug:
             print("[DEBUG] FSD called...")
@@ -304,7 +307,7 @@ class PyNUTClient(object):
         if (result == "OK FSD-SET\n"):
             return("OK")
         else:
-            raise Exception(result.replace("\n", ""))
+            raise PyNUTError(result.replace("\n", ""))
 
     def help(self):
         """Send HELP command."""
