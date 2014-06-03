@@ -221,7 +221,7 @@ class PyNUTClient(object):
         The result is a dictionary containing 'key->val' pairs of
         'UPSName' and a list of clients.
         """
-        logging.debug("list_clients from server")
+        logging.debug("list_clients from '%s'...", ups or "server")
 
         if ups and (ups not in self.list_ups()):
             raise PyNUTError("%s is not a valid UPS" % ups)
@@ -235,17 +235,16 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CLIENTS\n")
-        ups_dict = {}
 
+        clients = {}
         for line in result.split("\n"):
-            if line[:6] == "CLIENT":
-                host, ups = line[7:].split(' ')
-                ups.replace(' ', '')
-                if not ups in ups_dict:
-                    ups_dict[ups] = []
-                ups_dict[ups].append(host)
+            if line.startswith("CLIENT"):
+                host, ups = line[len("CLIENT "):].split(' ')[:2]
+                if not ups in clients:
+                    clients[ups] = []
+                clients[ups].append(host)
 
-        return ups_dict
+        return clients
 
     def list_rw_vars(self, ups=""):
         """Get a list of all writable vars from the selected UPS.
