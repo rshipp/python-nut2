@@ -66,14 +66,15 @@ class PyNUTClient(object):
     def __init__(self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5, connect=True):
         """Class initialization method.
 
-        host     : Host to connect (defaults to 127.0.0.1)
-        port     : Port where NUT listens for connections (defaults to 3493)
+        host     : Host to connect (defaults to 127.0.0.1).
+        port     : Port where NUT listens for connections (defaults to 3493).
         login    : Login used to connect to NUT server (defaults to None
-                   for no authentication)
-        password : Password used when using authentication (defaults to None)
+                   for no authentication).
+        password : Password used when using authentication (defaults to None).
         debug    : Boolean, put class in debug mode (prints everything
-                   on console, default to False)
-        timeout  : Timeout used to wait for network response
+                   on console, defaults to False).
+        timeout  : Timeout used to wait for network response (defaults
+                   to 5 seconds).
         """
         if debug:
             # Print DEBUG messages to the console.
@@ -123,13 +124,13 @@ class PyNUTClient(object):
         if self._login != None:
             self._srv_handler.write("USERNAME %s\n" % self._login)
             result = self._srv_handler.read_until("\n", self._timeout)
-            if result[:2] != "OK":
+            if not result.startswith("OK"):
                 raise PyNUTError(result.replace("\n", ""))
 
         if self._password != None:
             self._srv_handler.write("PASSWORD %s\n" % self._password)
             result = self._srv_handler.read_until("\n", self._timeout)
-            if result[:2] != "OK":
+            if not result.startswith("OK"):
                 raise PyNUTError(result.replace("\n", ""))
 
     def list_ups(self):
@@ -146,12 +147,12 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST UPS\n")
-        ups_dict = {}
 
+        ups_dict = {}
         for line in result.split("\n"):
-            if line[:3] == "UPS":
-                ups, desc = line[4:-1].split('"')
-                ups_dict[ups.replace(" ", "")] = desc
+            if line.startswith("UPS"):
+                ups, desc = line[len("UPS "):-len('"')].split('"')[:2]
+                ups_dict[ups.strip()] = desc.strip()
 
         return ups_dict
 
@@ -168,15 +169,14 @@ class PyNUTClient(object):
         if result != "BEGIN LIST VAR %s\n" % ups:
             raise PyNUTError(result.replace("\n", ""))
 
-        ups_vars = {}
         result = self._srv_handler.read_until("END LIST VAR %s\n" % ups)
         offset = len("VAR %s " % ups)
         end_offset = 0 - (len("END LIST VAR %s\n" % ups) + 1)
 
+        ups_vars = {}
         for current in result[:end_offset].split("\n"):
-            var = current[offset:].split('"')[0].replace(" ", "")
-            data = current[offset:].split('"')[1]
-            ups_vars[var] = data
+            var, data = current[offset:].split('"')[:2]
+            ups_vars[var.strip()] = data
 
         return ups_vars
 
