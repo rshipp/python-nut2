@@ -262,16 +262,11 @@ class PyNUTClient(object):
         result = self._srv_handler.read_until("END LIST RW %s\n" % ups)
         offset = len("VAR %s" % ups)
         end_offset = 0 - (len("END LIST RW %s\n" % ups) + 1)
-        rw_vars = {}
 
-        try:
-            for current in result[:end_offset].split("\n"):
-                var = current[offset:].split('"')[0].replace(" ", "")
-                data = current[offset:].split('"')[1]
-                rw_vars[var] = data
-        except Exception:
-            # FIXME: Make this except more specific.
-            pass
+        rw_vars = {}
+        for current in result[:end_offset].split("\n"):
+            var, data = current[offset:].split('"')[:2]
+            rw_vars[var.strip()] = data
 
         return rw_vars
 
