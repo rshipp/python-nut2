@@ -142,11 +142,12 @@ class PyNUTClient(object):
         logging.debug("list_ups from server")
 
         self._srv_handler.write("LIST UPS\n")
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "BEGIN LIST UPS\n":
             raise PyNUTError(result.replace("\n", ""))
 
-        result = self._srv_handler.read_until("END LIST UPS\n")
+        result = self._srv_handler.read_until("END LIST UPS\n",
+                self._timeout)
 
         ups_dict = {}
         for line in result.split("\n"):
@@ -165,11 +166,12 @@ class PyNUTClient(object):
         logging.debug("list_vars called...")
 
         self._srv_handler.write("LIST VAR %s\n" % ups)
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "BEGIN LIST VAR %s\n" % ups:
             raise PyNUTError(result.replace("\n", ""))
 
-        result = self._srv_handler.read_until("END LIST VAR %s\n" % ups)
+        result = self._srv_handler.read_until("END LIST VAR %s\n" % ups,
+                self._timeout)
         offset = len("VAR %s " % ups)
         end_offset = 0 - (len("END LIST VAR %s\n" % ups) + 1)
 
@@ -189,11 +191,12 @@ class PyNUTClient(object):
         logging.debug("list_commands called...")
 
         self._srv_handler.write("LIST CMD %s\n" % ups)
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "BEGIN LIST CMD %s\n" % ups:
             raise PyNUTError(result.replace("\n", ""))
 
-        result = self._srv_handler.read_until("END LIST CMD %s\n" % ups)
+        result = self._srv_handler.read_until("END LIST CMD %s\n" % ups,
+                self._timeout)
         offset = len("CMD %s " % ups)
         end_offset = 0 - (len("END LIST CMD %s\n" % ups) + 1)
 
@@ -204,7 +207,7 @@ class PyNUTClient(object):
             # For each var we try to get the available description
             try:
                 self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, command))
-                temp = self._srv_handler.read_until("\n")
+                temp = self._srv_handler.read_until("\n", self._timeout)
                 if temp.startswith("CMDDESC"):
                     desc_offset = len("CMDDESC %s %s " % (ups, command))
                     commands[command] = temp[desc_offset:-1].split('"')[1]
@@ -230,11 +233,12 @@ class PyNUTClient(object):
             self._srv_handler.write("LIST CLIENTS %s\n" % ups)
         else:
             self._srv_handler.write("LIST CLIENTS\n")
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "BEGIN LIST CLIENTS\n":
             raise PyNUTError(result.replace("\n", ""))
 
-        result = self._srv_handler.read_until("END LIST CLIENTS\n")
+        result = self._srv_handler.read_until("END LIST CLIENTS\n",
+                self._timeout)
 
         clients = {}
         for line in result.split("\n"):
@@ -255,11 +259,12 @@ class PyNUTClient(object):
         logging.debug("list_vars from '%s'...", ups)
 
         self._srv_handler.write("LIST RW %s\n" % ups)
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "BEGIN LIST RW %s\n" % ups:
             raise PyNUTError(result.replace("\n", ""))
 
-        result = self._srv_handler.read_until("END LIST RW %s\n" % ups)
+        result = self._srv_handler.read_until("END LIST RW %s\n" % ups,
+                self._timeout)
         offset = len("VAR %s" % ups)
         end_offset = 0 - (len("END LIST RW %s\n" % ups) + 1)
 
@@ -279,7 +284,7 @@ class PyNUTClient(object):
         logging.debug("set_var '%s' from '%s' to '%s'", var, ups, value)
 
         self._srv_handler.write("SET VAR %s %s %s\n" % (ups, var, value))
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "OK\n":
             raise PyNUTError(result.replace("\n", ""))
 
@@ -288,22 +293,22 @@ class PyNUTClient(object):
         logging.debug("run_command called...")
 
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "OK\n":
             raise PyNUTError(result.replace("\n", ""))
 
     def fsd(self, ups=""):
-        """Send FSD command."""
+        """Send MASTER and FSD commands."""
         logging.debug("MASTER called...")
 
         self._srv_handler.write("MASTER %s\n" % ups)
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "OK MASTER-GRANTED\n":
             raise PyNUTError(("Master level function are not available", ""))
 
         logging.debug("FSD called...")
         self._srv_handler.write("FSD %s\n" % ups)
-        result = self._srv_handler.read_until("\n")
+        result = self._srv_handler.read_until("\n", self._timeout)
         if result != "OK FSD-SET\n":
             raise PyNUTError(result.replace("\n", ""))
 
@@ -312,11 +317,11 @@ class PyNUTClient(object):
         logging.debug("HELP called...")
 
         self._srv_handler.write("HELP\n")
-        return self._srv_handler.read_until("\n")
+        return self._srv_handler.read_until("\n", self._timeout)
 
     def ver(self):
         """Send VER command."""
         logging.debug("VER called...")
 
         self._srv_handler.write("VER\n")
-        return self._srv_handler.read_until("\n")
+        return self._srv_handler.read_until("\n", self._timeout)
