@@ -36,7 +36,7 @@
 #            Added support for LIST CLIENTS command
 #
 # 2014-06-02 george2 - Version 2.0.0
-#            Refactored the API, broke backwards compatability.
+#            Refactored the API, broke backwards compatibility.
 #
 
 import telnetlib
