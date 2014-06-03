@@ -58,11 +58,10 @@ class PyNUTClient(object):
 
     def __init__(self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5, connect=True):
         """Class initialization method.
-
-        host     : Host to connect (default to localhost)
-        port     : Port where NUT listens for connections (default to 3493)
-        login    : Login used to connect to NUT server (default to None for no authentication)
-        password : Password used when using authentication (default to None)
+        host     : Host to connect (defaults to 127.0.0.1)
+        port     : Port where NUT listens for connections (defaults to 3493)
+        login    : Login used to connect to NUT server (defaults to None for no authentication)
+        password : Password used when using authentication (defaults to None)
         debug    : Boolean, put class in debug mode (prints everything on console, default to False)
         timeout  : Timeout used to wait for network response
         """
@@ -91,9 +90,8 @@ class PyNUTClient(object):
 
     def __connect(self):
         """Connects to the defined server.
-
-        If login/pass was specified, the class tries to authenticate. An error is raised
-        if something goes wrong.
+        If login/pass was specified, the class tries to authenticate. An
+        error is raised if something goes wrong.
         """
         if self.__debug :
             print("[DEBUG] Connecting to host")
@@ -114,8 +112,8 @@ class PyNUTClient(object):
 
     def list_ups(self):
         """Returns the list of available UPS from the NUT server.
-
-        The result is a dictionary containing 'key->val' pairs of 'UPSName' and 'UPS Description'
+        The result is a dictionary containing 'key->val' pairs of
+        'UPSName' and 'UPS Description'.
         """
         if self.__debug :
             print("[DEBUG] list_ups from server")
@@ -137,7 +135,6 @@ class PyNUTClient(object):
 
     def list_vars(self, ups=""):
         """Get all available vars from the specified UPS.
-
         The result is a dictionary containing 'key->val' pairs of all
         available vars.
         """
@@ -163,7 +160,6 @@ class PyNUTClient(object):
 
     def list_commands(self, ups=""):
         """Get all available commands for the specified UPS.
-
         The result is a dict object with command name as key and a description
         of the command as value.
         """
@@ -199,9 +195,40 @@ class PyNUTClient(object):
 
         return(ups_cmds)
 
+    def list_clients(self, ups = None):
+        """Returns the list of connected clients from the NUT server.
+        The result is a dictionary containing 'key->val' pairs of
+        'UPSName' and a list of clients
+        """
+        if self.__debug :
+            print("[DEBUG] list_clients from server")
+
+        if ups and (ups not in self.list_ups()):
+            raise Exception("%s is not a valid UPS" % ups)
+
+        if ups:
+            self._srv_handler.write("LIST CLIENTS %s\n" % ups)
+        else:
+            self._srv_handler.write("LIST CLIENTS\n")
+        result = self._srv_handler.read_until("\n")
+        if result != "BEGIN LIST CLIENTS\n" :
+            raise Exception(result.replace("\n", ""))
+
+        result = self._srv_handler.read_until("END LIST CLIENTS\n")
+        ups_dict = {}
+
+        for line in result.split("\n"):
+            if line[:6] == "CLIENT" :
+                host, ups = line[7:].split(' ')
+                ups.replace(' ', '')
+                if not ups in ups_dict:
+                    ups_dict[ups] = []
+                ups_dict[ups].append(host)
+
+        return(ups_dict)
+
     def list_rw_vars(self,  ups=""):
         """Get a list of all writable vars from the selected UPS.
-
         The result is presented as a dictionary containing 'key->val'
         pairs.
         """
@@ -231,7 +258,6 @@ class PyNUTClient(object):
 
     def set_var(self, ups="", var="", value=""):
         """Set a variable to the specified value on selected UPS.
-
         The variable must be a writable value (cf list_rw_vars) and you
         must have the proper rights to set it (maybe login/password).
         """
@@ -245,7 +271,6 @@ class PyNUTClient(object):
 
     def run_command(self, ups="", command=""):
         """Send a command to the specified UPS.
-
         Returns OK on success or raises an error.
         """
 
@@ -261,7 +286,6 @@ class PyNUTClient(object):
 
     def fsd(self, ups="") :
         """Send FSD command.
-
         Returns OK on success or raises an error.
         """
 
@@ -299,36 +323,3 @@ class PyNUTClient(object):
 
         self._srv_handler.write("VER\n")
         return self._srv_handler.read_until("\n")
-
-    def list_clients(self, ups = None):
-        """Returns the list of connected clients from the NUT server.
-
-        The result is a dictionary containing 'key->val' pairs of
-        'UPSName' and a list of clients
-        """
-        if self.__debug :
-            print("[DEBUG] list_clients from server")
-
-        if ups and (ups not in self.list_ups()):
-            raise Exception("%s is not a valid UPS" % ups)
-
-        if ups:
-            self._srv_handler.write("LIST CLIENTS %s\n" % ups)
-        else:
-            self._srv_handler.write("LIST CLIENTS\n")
-        result = self._srv_handler.read_until("\n")
-        if result != "BEGIN LIST CLIENTS\n" :
-            raise Exception(result.replace("\n", ""))
-
-        result = self._srv_handler.read_until("END LIST CLIENTS\n")
-        ups_dict = {}
-
-        for line in result.split("\n"):
-            if line[:6] == "CLIENT" :
-                host, ups = line[7:].split(' ')
-                ups.replace(' ', '')
-                if not ups in ups_dict:
-                    ups_dict[ups] = []
-                ups_dict[ups].append(host)
-
-        return(ups_dict)
