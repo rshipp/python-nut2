@@ -193,29 +193,27 @@ class PyNUTClient(object):
         if result != "BEGIN LIST CMD %s\n" % ups:
             raise PyNUTError(result.replace("\n", ""))
 
-        ups_cmds = {}
         result = self._srv_handler.read_until("END LIST CMD %s\n" % ups)
         offset = len("CMD %s " % ups)
         end_offset = 0 - (len("END LIST CMD %s\n" % ups) + 1)
 
+        commands = {}
         for current in result[:end_offset].split("\n"):
-            var = current[offset:].split('"')[0].replace(" ", "")
+            command = current[offset:].split('"')[0].strip()
 
             # For each var we try to get the available description
             try:
-                self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, var))
+                self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, command))
                 temp = self._srv_handler.read_until("\n")
-                if temp[:7] != "CMDDESC":
-                    raise PyNUTError
+                if temp.startswith("CMDDESC"):
+                    desc_offset = len("CMDDESC %s %s " % (ups, command))
+                    commands[command] = temp[desc_offset:-1].split('"')[1]
                 else:
-                    off = len("CMDDESC %s %s " % (ups, var))
-                    desc = temp[off:-1].split('"')[1]
-            except PyNUTError:
-                desc = var
+                    commands[command] = command
+            except IndexError:
+                commands[command] = command
 
-            ups_cmds[var] = desc
-
-        return ups_cmds
+        return commands
 
     def list_clients(self, ups=None):
         """Returns the list of connected clients from the NUT server.
