@@ -1,5 +1,11 @@
 import unittest
 from mockserver import MockServer
+import telnetlib
+try:
+    from mock import Mock
+except ImportError:
+    from unittest.mock import Mock
+
 from nut2 import PyNUTClient, PyNUTError
 
 class TestClient(unittest.TestCase):
@@ -15,10 +21,41 @@ class TestClient(unittest.TestCase):
         self.invalid = "does_not_exist"
         self.valid_ups_name = "Test UPS 1"
         self.valid_command_desc = "Test description"
+        telnetlib.Telnet = Mock()
 
     def test_init_with_args(self):
         PyNUTClient(connect=False, login='test', password='test',
                 host='test', port=1)
+
+    def test_supports_context_manager(self):
+        try:
+            with PyNUTClient(connect=False) as client:
+                pass
+        except AttributeError:
+            assert(False)
+
+    def test_connect(self):
+        try:
+            PyNUTClient()
+        except Exception:
+            assert(False)
+
+    def test_connect_debug(self):
+        try:
+            PyNUTClient(debug=True)
+        except Exception:
+            assert(False)
+
+    def test_connect_credentials(self):
+        # FIXME: Mock the __gettem__ call, so this can be fully tested.
+        try:
+            PyNUTClient(login=self.valid, password=self.valid)
+        except TypeError:
+            pass
+        except PyNUTError:
+            pass
+        except Exception:
+            assert(False)
 
     def test_get_ups_list(self):
         ups_list = self.client.list_ups()
