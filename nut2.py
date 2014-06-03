@@ -280,32 +280,20 @@ class PyNUTClient(object):
 
         self._srv_handler.write("SET VAR %s %s %s\n" % (ups, var, value))
         result = self._srv_handler.read_until("\n")
-        if result == "OK\n":
-            return True
-        else:
-            raise PyNUTError(result)
+        if result != "OK\n":
+            raise PyNUTError(result.replace("\n", ""))
 
     def run_command(self, ups="", command=""):
-        """Send a command to the specified UPS.
-
-        Returns OK on success or raises an error.
-        """
-
+        """Send a command to the specified UPS."""
         logging.debug("run_command called...")
 
         self._srv_handler.write("INSTCMD %s %s\n" % (ups, command))
         result = self._srv_handler.read_until("\n")
-        if result == "OK\n":
-            return True
-        else:
+        if result != "OK\n":
             raise PyNUTError(result.replace("\n", ""))
 
     def fsd(self, ups=""):
-        """Send FSD command.
-
-        Returns OK on success or raises an error.
-        """
-
+        """Send FSD command."""
         logging.debug("MASTER called...")
 
         self._srv_handler.write("MASTER %s\n" % ups)
@@ -316,14 +304,11 @@ class PyNUTClient(object):
         logging.debug("FSD called...")
         self._srv_handler.write("FSD %s\n" % ups)
         result = self._srv_handler.read_until("\n")
-        if result == "OK FSD-SET\n":
-            return True
-        else:
+        if result != "OK FSD-SET\n":
             raise PyNUTError(result.replace("\n", ""))
 
     def help(self):
         """Send HELP command."""
-
         logging.debug("HELP called...")
 
         self._srv_handler.write("HELP\n")
@@ -331,7 +316,6 @@ class PyNUTClient(object):
 
     def ver(self):
         """Send VER command."""
-
         logging.debug("VER called...")
 
         self._srv_handler.write("VER\n")
