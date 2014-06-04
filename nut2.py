@@ -5,53 +5,28 @@
 * PyNUTError: Base class for custom exceptions.
 * PyNUTClient: Allows connecting to and communicating with PyNUT
   servers.
+
+Copyright (C) 2013 george2
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-
-#   Copyright (C) 2014 george2
-#
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 3 of the License, or
-#   (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# 2008-01-14 David Goncalves
-#            PyNUT is an abstraction class to access NUT (Network UPS
-#            Tools) server.
-#
-# 2008-06-09 David Goncalves
-#            Added 'GetRWVars' and 'SetRWVar' commands.
-#
-# 2009-02-19 David Goncalves
-#            Changed class PyNUT to PyNUTClient
-#
-# 2010-07-23 David Goncalves - Version 1.2
-#            Changed GetRWVars function that fails is the UPS is not
-#            providing such vars.
-#
-# 2011-07-05 René Martín Rodríguez <rmrodri@ull.es> - Version 1.2.1
-#            Added support for FSD, HELP and VER commands
-#
-# 2012-02-07 René Martín Rodríguez <rmrodri@ull.es> - Version 1.2.2
-#            Added support for LIST CLIENTS command
-#
-# 2014-06-02 george2 - Version 2.0.0
-#            Refactored the API, broke backwards compatibility.
-#
 
 import telnetlib
 import logging
 
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __all__ = ['PyNUTError', 'PyNUTClient']
 
 logging.basicConfig(level=logging.WARNING, format="[%(levelname)s] %(message)s")
@@ -168,7 +143,7 @@ class PyNUTClient(object):
         except IndexError:
             raise PyNUTError(result.replace("\n", ""))
 
-    def list_vars(self, ups=""):
+    def list_vars(self, ups):
         """Get all available vars from the specified UPS.
 
         The result is a dictionary containing 'key->val' pairs of all
@@ -193,7 +168,7 @@ class PyNUTClient(object):
 
         return ups_vars
 
-    def list_commands(self, ups=""):
+    def list_commands(self, ups):
         """Get all available commands for the specified UPS.
 
         The result is a dict object with command name as key and a description
@@ -261,7 +236,7 @@ class PyNUTClient(object):
 
         return clients
 
-    def list_rw_vars(self, ups=""):
+    def list_rw_vars(self, ups):
         """Get a list of all writable vars from the selected UPS.
 
         The result is presented as a dictionary containing 'key->val'
@@ -349,7 +324,7 @@ class PyNUTClient(object):
         if result != "OK\n":
             raise PyNUTError(result.replace("\n", ""))
 
-    def fsd(self, ups=""):
+    def fsd(self, ups):
         """Send MASTER and FSD commands."""
         logging.debug("MASTER called...")
 
@@ -364,7 +339,7 @@ class PyNUTClient(object):
         if result != "OK FSD-SET\n":
             raise PyNUTError(result.replace("\n", ""))
 
-    def num_logins(self, ups=""):
+    def num_logins(self, ups):
         """Send GET NUMLOGINS command to get the number of users logged
         into a given UPS.
         """
