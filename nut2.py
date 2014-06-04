@@ -108,6 +108,17 @@ class PyNUTClient(object):
             if not result == "OK\n":
                 raise PyNUTError(result.replace("\n", ""))
 
+    def description(self, ups):
+        """Returns the description for a given UPS."""
+        logging.debug("description called...")
+
+        self._srv_handler.write("GET UPSDESC %s\n" % ups)
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            return result.split('"')[1].strip()
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
     def list_ups(self):
         """Returns the list of available UPS from the NUT server.
 
@@ -131,17 +142,6 @@ class PyNUTClient(object):
                 ups_dict[ups.strip()] = desc.strip()
 
         return ups_dict
-
-    def description(self, ups):
-        """Returns the description for a given UPS."""
-        logging.debug("description called...")
-
-        self._srv_handler.write("GET UPSDESC %s\n" % ups)
-        result = self._srv_handler.read_until("\n", self._timeout)
-        try:
-            return result.split('"')[1].strip()
-        except IndexError:
-            raise PyNUTError(result.replace("\n", ""))
 
     def list_vars(self, ups):
         """Get all available vars from the specified UPS.
@@ -261,6 +261,52 @@ class PyNUTClient(object):
 
         return rw_vars
 
+    def list_enum(self, ups, var):
+        """Get a list of valid values for an enum variable.
+
+        The result is presented as a list.
+        """
+        logging.debug("list_enum from '%s'...", ups)
+
+        self._srv_handler.write("LIST ENUM %s %s\n" % (ups, var))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        if result != "BEGIN LIST ENUM %s %s\n" % (ups, var):
+            raise PyNUTError(result.replace("\n", ""))
+
+        result = self._srv_handler.read_until("END LIST ENUM %s %s\n" % (ups, var),
+                self._timeout)
+        offset = len("ENUM %s %s" % (ups, var))
+        end_offset = 0 - (len("END LIST ENUM %s %s\n" % (ups, var)) + 1)
+
+        try:
+            return [ c[offset:].split('"')[1].strip() 
+                for c in result[:end_offset].split("\n") ]
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
+    def list_range(self, ups, var):
+        """Get a list of valid values for an range variable.
+
+        The result is presented as a list.
+        """
+        logging.debug("list_range from '%s'...", ups)
+
+        self._srv_handler.write("LIST RANGE %s %s\n" % (ups, var))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        if result != "BEGIN LIST RANGE %s %s\n" % (ups, var):
+            raise PyNUTError(result.replace("\n", ""))
+
+        result = self._srv_handler.read_until("END LIST RANGE %s %s\n" % (ups, var),
+                self._timeout)
+        offset = len("RANGE %s %s" % (ups, var))
+        end_offset = 0 - (len("END LIST RANGE %s %s\n" % (ups, var)) + 1)
+
+        try:
+            return [ c[offset:].split('"')[1].strip() 
+                for c in result[:end_offset].split("\n") ]
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
     def set_var(self, ups, var, value):
         """Set a variable to the specified value on selected UPS.
 
@@ -281,7 +327,7 @@ class PyNUTClient(object):
         self._srv_handler.write("GET VAR %s %s\n" % (ups, var))
         result = self._srv_handler.read_until("\n", self._timeout)
         try:
-            # result = 'VAR %s %s "%s"' % (ups, var, value)
+            # result = 'VAR %s %s "%s"\n' % (ups, var, value)
             return result.split('"')[1].strip()
         except IndexError:
             raise PyNUTError(result.replace("\n", ""))
@@ -298,9 +344,25 @@ class PyNUTClient(object):
         self._srv_handler.write("GET DESC %s %s\n" % (ups, var))
         result = self._srv_handler.read_until("\n", self._timeout)
         try:
-            # result = 'DESC %s %s "%s"' % (ups, var, description)
+            # result = 'DESC %s %s "%s"\n' % (ups, var, description)
             return result.split('"')[1].strip()
         except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
+    def var_type(self, ups, var):
+        """Get a variable's type."""
+        logging.debug("var_type called...")
+
+        self._srv_handler.write("GET TYPE %s %s\n" % (ups, var))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            # result = 'TYPE %s %s %s\n' % (ups, var, type)
+            type_ = ' '.join(result.split(' ')[3:]).strip()
+            # Ensure the response was valid.
+            assert(len(type_) > 0)
+            assert(result.startswith("TYPE"))
+            return type_
+        except AssertionError:
             raise PyNUTError(result.replace("\n", ""))
 
     def command_description(self, ups, command):

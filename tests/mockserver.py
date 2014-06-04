@@ -65,13 +65,13 @@ class MockServer(object):
             return 'ERR INVALID-ARGUMENT\n'
         elif self.command == "LIST ENUM %s %s\n" % (self.valid, self.valid) and self.first:
             self.first = False
-            return 'BEGIN LIST ENUM %s %s\n' (self.valid, self.valid)
+            return 'BEGIN LIST ENUM %s %s\n' % (self.valid, self.valid)
         elif self.command == "LIST ENUM %s %s\n" % (self.valid, self.valid):
             return 'ENUM %s %s %s\nEND LIST ENUM %s %s\n' % (self.valid,
                     self.valid, self.valid_desc, self.valid, self.valid)
         elif self.command == "LIST RANGE %s %s\n" % (self.valid, self.valid) and self.first:
             self.first = False
-            return 'BEGIN LIST RANGE %s %s\n' (self.valid, self.valid)
+            return 'BEGIN LIST RANGE %s %s\n' % (self.valid, self.valid)
         elif self.command == "LIST RANGE %s %s\n" % (self.valid, self.valid):
             return 'RANGE %s %s %s %s\nEND LIST RANGE %s %s\n' % (self.valid,
                     self.valid, self.valid_desc, self.valid_desc, self.valid, self.valid)

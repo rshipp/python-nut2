@@ -227,3 +227,27 @@ class TestClient(unittest.TestCase):
     def test_command_description_broken(self):
         self.assertRaises(PyNUTError, self.broken_client.command_description,
                 self.valid, self.valid)
+
+    def test_list_enum(self):
+        self.assertEquals(self.client.list_enum(self.valid, self.valid), 
+                [self.valid_desc])
+
+    def test_list_enum_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.list_enum,
+                self.valid, self.valid)
+
+    def test_list_range(self):
+        self.assertEquals(self.client.list_range(self.valid, self.valid), 
+                [self.valid_desc])
+
+    def test_list_range_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.list_range,
+                self.valid, self.valid)
+
+    def test_var_type(self):
+        self.assertEquals(self.client.var_type(self.valid, self.valid), 
+                "RW STRING:3")
+
+    def test_var_type_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.var_type,
+                self.valid, self.valid)
