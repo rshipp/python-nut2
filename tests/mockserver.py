@@ -29,7 +29,7 @@ class MockServer(object):
         elif self.command == "VER\n":
             return 'Network UPS Tools upsd 2.7.1 - http://www.networkupstools.org/\n'
         elif self.command == "GET CMDDESC %s %s\n" % (self.valid, self.valid):
-            return 'CMDDESC '+self.valid+' '+self.valid+' "Test description"\n'
+            return 'CMDDESC '+self.valid+' '+self.valid+' '+self.valid_desc+'\n'
         elif self.command == "LIST UPS\n" and self.first:
             self.first = False
             return 'BEGIN LIST UPS\n'

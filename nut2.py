@@ -157,6 +157,17 @@ class PyNUTClient(object):
 
         return ups_dict
 
+    def description(self, ups):
+        """Returns the description for a given UPS."""
+        logging.debug("description called...")
+
+        self._srv_handler.write("GET UPSDESC %s\n" % ups)
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            return result.split('"')[1].strip()
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
     def list_vars(self, ups=""):
         """Get all available vars from the specified UPS.
 
@@ -275,7 +286,7 @@ class PyNUTClient(object):
 
         return rw_vars
 
-    def set_var(self, ups="", var="", value=""):
+    def set_var(self, ups, var, value):
         """Set a variable to the specified value on selected UPS.
 
         The variable must be a writable value (cf list_rw_vars) and you
@@ -288,7 +299,48 @@ class PyNUTClient(object):
         if result != "OK\n":
             raise PyNUTError(result.replace("\n", ""))
 
-    def run_command(self, ups="", command=""):
+    def get_var(self, ups, var):
+        """Get the value of a variable."""
+        logging.debug("get_var called...")
+
+        self._srv_handler.write("GET VAR %s %s\n" % (ups, var))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            # result = 'VAR %s %s "%s"' % (ups, var, value)
+            return result.split('"')[1].strip()
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
+    # Alias for convenience
+    def get(self, ups, var):
+        """Get the value of a variable (alias for get_var)."""
+        return self.get_var(ups, var)
+
+    def var_description(self, ups, var):
+        """Get a variable's description."""
+        logging.debug("var_description called...")
+
+        self._srv_handler.write("GET DESC %s %s\n" % (ups, var))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            # result = 'DESC %s %s "%s"' % (ups, var, description)
+            return result.split('"')[1].strip()
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
+    def command_description(self, ups, command):
+        """Get a command's description."""
+        logging.debug("command_description called...")
+
+        self._srv_handler.write("GET CMDDESC %s %s\n" % (ups, command))
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            # result = 'CMDDESC %s %s "%s"' % (ups, command, description)
+            return result.split('"')[1].strip()
+        except IndexError:
+            raise PyNUTError(result.replace("\n", ""))
+
+    def run_command(self, ups, command):
         """Send a command to the specified UPS."""
         logging.debug("run_command called...")
 
@@ -310,6 +362,20 @@ class PyNUTClient(object):
         self._srv_handler.write("FSD %s\n" % ups)
         result = self._srv_handler.read_until("\n", self._timeout)
         if result != "OK FSD-SET\n":
+            raise PyNUTError(result.replace("\n", ""))
+
+    def num_logins(self, ups=""):
+        """Send GET NUMLOGINS command to get the number of users logged
+        into a given UPS.
+        """
+        logging.debug("num_logins called on '%s'...", ups)
+
+        self._srv_handler.write("GET NUMLOGINS %s\n" % ups)
+        result = self._srv_handler.read_until("\n", self._timeout)
+        try:
+            # result = "NUMLOGINS %s %s\n" % (ups, int(numlogins))
+            return int(result.split(' ')[2].strip())
+        except (ValueError, IndexError):
             raise PyNUTError(result.replace("\n", ""))
 
     def help(self):

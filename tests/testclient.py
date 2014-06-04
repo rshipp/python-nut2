@@ -21,7 +21,9 @@ class TestClient(unittest.TestCase):
         self.valid = "test"
         self.invalid = "does_not_exist"
         self.valid_ups_name = "Test UPS 1"
-        self.valid_command_desc = "Test description"
+        self.valid_desc = self.valid_ups_name
+        self.valid_value = '100'
+        self.valid_command_desc = self.valid_desc
         telnetlib.Telnet = Mock()
 
     def test_init_with_args(self):
@@ -182,3 +184,46 @@ class TestClient(unittest.TestCase):
     def test_list_clients_broken(self):
         self.assertRaises(PyNUTError, self.broken_client.list_clients,
                 self.valid)
+
+    def test_num_logins(self):
+        self.assertEquals(self.client.num_logins(self.valid), 1)
+
+    def test_num_logins_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.num_logins,
+                self.valid)
+
+    def test_description(self):
+        self.assertEquals(self.client.description(self.valid),
+                self.valid_desc)
+
+    def test_description_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.description,
+                self.valid)
+
+    def test_get(self):
+        self.assertEquals(self.client.get(self.valid, self.valid),
+                self.valid_value)
+
+    def test_get_var_alias_for_get(self):
+        self.assertEquals(self.client.get(self.valid, self.valid),
+                self.client.get_var(self.valid, self.valid))
+
+    def test_get_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.get,
+                self.valid, self.valid)
+
+    def test_var_description(self):
+        self.assertEquals(self.client.var_description(self.valid,
+                    self.valid), self.valid_desc)
+
+    def test_var_description_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.var_description,
+                self.valid, self.valid)
+
+    def test_command_description(self):
+        self.assertEquals(self.client.command_description(self.valid,
+                    self.valid), self.valid_desc)
+
+    def test_command_description_broken(self):
+        self.assertRaises(PyNUTError, self.broken_client.command_description,
+                self.valid, self.valid)
