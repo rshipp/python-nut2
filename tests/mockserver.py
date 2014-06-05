@@ -2,7 +2,7 @@
 
 class MockServer(object):
     def __init__(self, host=None, port=None, broken=True, ok=True,
-            broken_username=False):
+            broken_username=False, timeout=None):
         self.valid = "test"
         self.valid_desc = '"Test UPS 1"'
         self.broken = broken

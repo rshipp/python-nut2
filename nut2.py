@@ -94,19 +94,23 @@ class PyNUTClient(object):
         """
         logging.debug("Connecting to host")
 
-        self._srv_handler = telnetlib.Telnet(self._host, self._port)
+        try:
+            self._srv_handler = telnetlib.Telnet(self._host, self._port,
+                    timeout=self._timeout)
 
-        if self._login != None:
-            self._srv_handler.write("USERNAME %s\n" % self._login)
-            result = self._srv_handler.read_until("\n", self._timeout)
-            if not result == "OK\n":
-                raise PyNUTError(result.replace("\n", ""))
+            if self._login != None:
+                self._srv_handler.write("USERNAME %s\n" % self._login)
+                result = self._srv_handler.read_until("\n", self._timeout)
+                if not result == "OK\n":
+                    raise PyNUTError(result.replace("\n", ""))
 
-        if self._password != None:
-            self._srv_handler.write("PASSWORD %s\n" % self._password)
-            result = self._srv_handler.read_until("\n", self._timeout)
-            if not result == "OK\n":
-                raise PyNUTError(result.replace("\n", ""))
+            if self._password != None:
+                self._srv_handler.write("PASSWORD %s\n" % self._password)
+                result = self._srv_handler.read_until("\n", self._timeout)
+                if not result == "OK\n":
+                    raise PyNUTError(result.replace("\n", ""))
+        except telnetlib.socket.error:
+            raise PyNUTError("Socket error.")
 
     def description(self, ups):
         """Returns the description for a given UPS."""
