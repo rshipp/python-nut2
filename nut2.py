@@ -74,11 +74,10 @@ class PyNUTClient(object):
         if self._srv_handler:
             try:
                 self._srv_handler.write("LOGOUT\n")
-            except telnetlib.socket.error:
+                self._srv_handler.close()
+            except (telnetlib.socket.error, AttributeError):
                 # The socket is already disconnected.
                 pass
-            finally:
-                self._srv_handler.close()
 
     def __enter__(self):
         return self
@@ -96,15 +95,15 @@ class PyNUTClient(object):
 
         try:
             self._srv_handler = telnetlib.Telnet(self._host, self._port,
-                    timeout=self._timeout)
+                                                 timeout=self._timeout)
 
-            if self._login != None:
+            if self._login is not None:
                 self._srv_handler.write("USERNAME %s\n" % self._login)
                 result = self._srv_handler.read_until("\n", self._timeout)
                 if not result == "OK\n":
                     raise PyNUTError(result.replace("\n", ""))
 
-            if self._password != None:
+            if self._password is not None:
                 self._srv_handler.write("PASSWORD %s\n" % self._password)
                 result = self._srv_handler.read_until("\n", self._timeout)
                 if not result == "OK\n":
@@ -137,7 +136,7 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST UPS\n",
-                self._timeout)
+                                              self._timeout)
 
         ups_dict = {}
         for line in result.split("\n"):
@@ -161,7 +160,7 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST VAR %s\n" % ups,
-                self._timeout)
+                                              self._timeout)
         offset = len("VAR %s " % ups)
         end_offset = 0 - (len("END LIST VAR %s\n" % ups) + 1)
 
@@ -186,7 +185,7 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CMD %s\n" % ups,
-                self._timeout)
+                                              self._timeout)
         offset = len("CMD %s " % ups)
         end_offset = 0 - (len("END LIST CMD %s\n" % ups) + 1)
 
@@ -228,13 +227,13 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST CLIENTS\n",
-                self._timeout)
+                                              self._timeout)
 
         clients = {}
         for line in result.split("\n"):
             if line.startswith("CLIENT"):
                 host, ups = line[len("CLIENT "):].split(' ')[:2]
-                if not ups in clients:
+                if ups not in clients:
                     clients[ups] = []
                 clients[ups].append(host)
 
@@ -254,7 +253,7 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST RW %s\n" % ups,
-                self._timeout)
+                                              self._timeout)
         offset = len("VAR %s" % ups)
         end_offset = 0 - (len("END LIST RW %s\n" % ups) + 1)
 
@@ -278,13 +277,13 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST ENUM %s %s\n" % (ups, var),
-                self._timeout)
+                                              self._timeout)
         offset = len("ENUM %s %s" % (ups, var))
         end_offset = 0 - (len("END LIST ENUM %s %s\n" % (ups, var)) + 1)
 
         try:
             return [ c[offset:].split('"')[1].strip() 
-                for c in result[:end_offset].split("\n") ]
+                     for c in result[:end_offset].split("\n") ]
         except IndexError:
             raise PyNUTError(result.replace("\n", ""))
 
@@ -301,13 +300,13 @@ class PyNUTClient(object):
             raise PyNUTError(result.replace("\n", ""))
 
         result = self._srv_handler.read_until("END LIST RANGE %s %s\n" % (ups, var),
-                self._timeout)
+                                              self._timeout)
         offset = len("RANGE %s %s" % (ups, var))
         end_offset = 0 - (len("END LIST RANGE %s %s\n" % (ups, var)) + 1)
 
         try:
             return [ c[offset:].split('"')[1].strip() 
-                for c in result[:end_offset].split("\n") ]
+                     for c in result[:end_offset].split("\n") ]
         except IndexError:
             raise PyNUTError(result.replace("\n", ""))
 
