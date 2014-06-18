@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='nut2',
     version=__version__,
-    modules=['nut2'],
+    py_modules=['nut2'],
     include_package_data=True,
     install_requires=[],
     license='GPL3',
