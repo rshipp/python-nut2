@@ -3,7 +3,7 @@ from setuptools import setup
 
 from nut2 import __version__
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
+README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -17,9 +17,9 @@ setup(
     license='GPL3',
     description='A Python abstraction class to access NUT servers.',
     long_description=README,
-    url='https://github.com/george2/python-nut2',
-    author='george2',
-    author_email='rpubaddr0@gmail.com',
+    url='https://github.com/rshipp/python-nut2',
+    author='Ryan Shipp',
+    author_email='python@rshipp.com',
     classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',

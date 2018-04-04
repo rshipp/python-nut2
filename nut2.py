@@ -6,7 +6,7 @@
 * PyNUTClient: Allows connecting to and communicating with PyNUT
   servers.
 
-Copyright (C) 2013 george2
+Copyright (C) 2018 Ryan Shipp
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
