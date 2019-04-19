@@ -6,7 +6,7 @@
 * PyNUTClient: Allows connecting to and communicating with PyNUT
   servers.
 
-Copyright (C) 2018 Ryan Shipp
+Copyright (C) 2019 Ryan Shipp
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import telnetlib
 import logging
 
 
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __all__ = ['PyNUTError', 'PyNUTClient']
 
 logging.basicConfig(level=logging.WARNING, format="[%(levelname)s] %(message)s")
