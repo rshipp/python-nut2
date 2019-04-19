@@ -23,8 +23,8 @@ endorsed by the `Network UPS Tools developers`_.
 Requirements
 ------------
 
-The module itself requires only Python (known to work with versions 2.6 through
-3.4). If you wish to run the tests, do ``pip install -r requirements-testing.txt``.
+The module itself requires only Python (2.7 or 3.5+).
+If you wish to run the tests, do ``pip install -r requirements-testing.txt``.
 
 Usage
 -----
