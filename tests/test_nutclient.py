@@ -12,32 +12,32 @@ if __name__ == "__main__" :
     nut    = PyNUTClient( debug=True )
     #nut    = PyNUTClient( login="upsadmin", password="upsadmin", debug=True )
 
-    print( 80*"-" + "\nTesting 'GetUPSList' :")
-    result = nut.GetUPSList( )
+    print( 80*"-" + "\nTesting 'list_ups' :")
+    result = nut.list_ups( )
     print( "\033[01;33m%s\033[0m\n" % result )
 
-    print( 80*"-" + "\nTesting 'GetUPSVars' :")
-    result = nut.GetUPSVars( "dummy" )
+    print( 80*"-" + "\nTesting 'list_vars' :")
+    result = nut.list_vars( "dummy" )
     print( "\033[01;33m%s\033[0m\n" % result )
 
-    print( 80*"-" + "\nTesting 'GetUPSCommands' :")
-    result = nut.GetUPSCommands( "dummy" )
+    print( 80*"-" + "\nTesting 'list_commands' :")
+    result = nut.list_commands( "dummy" )
     print( "\033[01;33m%s\033[0m\n" % result )
 
-    print( 80*"-" + "\nTesting 'GetRWVars' :")
-    result = nut.GetRWVars( "dummy" )
+    print( 80*"-" + "\nTesting 'list_rw_vars' :")
+    result = nut.list_rw_vars( "dummy" )
     print( "\033[01;33m%s\033[0m\n" % result )
 
-    print( 80*"-" + "\nTesting 'RunUPSCommand' (Test front panel) :")
+    print( 80*"-" + "\nTesting 'run_command' (Test front panel) :")
     try :
-        result = nut.RunUPSCommand( "UPS1", "test.panel.start" )
+        result = nut.run_command( "UPS1", "test.panel.start" )
     except :
         result = sys.exc_info()[1]
     print( "\033[01;33m%s\033[0m\n" % result )
 
-    print( 80*"-" + "\nTesting 'SetUPSVar' (set ups.id to test):")
+    print( 80*"-" + "\nTesting 'set_var' (set ups.id to test):")
     try :
-        result = nut.SetRWVar( "UPS1", "ups.id", "test" )
+        result = nut.set_var( "UPS1", "ups.id", "test" )
     except :
         result = sys.exc_info()[1]
     print( "\033[01;33m%s\033[0m\n" % result )
