@@ -3,14 +3,18 @@
 
 # This source code is provided for testing/debuging purpose ;)
 
-from nut2 import PyNUTClient
+import logging
 import sys
 
+import nut2
+from nut2 import PyNUTClient
+
 if __name__ == "__main__" :
+    nut2.logger.setLevel(logging.DEBUG)
 
     print( "PyNUTClient test..." )
-    nut    = PyNUTClient( debug=True )
-    #nut    = PyNUTClient( login="upsadmin", password="upsadmin", debug=True )
+    nut    = PyNUTClient()
+    #nut    = PyNUTClient( login="upsadmin", password="upsadmin" )
 
     print( 80*"-" + "\nTesting 'GetUPSList' :")
     result = nut.GetUPSList( )

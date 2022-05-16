@@ -39,7 +39,7 @@ class PyNUTError(Exception):
 class PyNUTClient(object):
     """Access NUT (Network UPS Tools) servers."""
 
-    def __init__(self, host="127.0.0.1", port=3493, login=None, password=None, debug=False, timeout=5, connect=True):
+    def __init__(self, host="127.0.0.1", port=3493, login=None, password=None, timeout=5, connect=True):
         """Class initialization method.
 
         host     : Host to connect (defaults to 127.0.0.1).
@@ -47,15 +47,9 @@ class PyNUTClient(object):
         login    : Login used to connect to NUT server (defaults to None
                    for no authentication).
         password : Password used when using authentication (defaults to None).
-        debug    : Boolean, put class in debug mode (prints everything
-                   on console, defaults to False).
         timeout  : Timeout used to wait for network response (defaults
                    to 5 seconds).
         """
-        if debug:
-            # Print DEBUG messages to the console.
-            logger.setLevel(logging.DEBUG)
-
         logger.debug("Class initialization...")
         logger.debug(" -> Host = %s (port %s)", host, port)
         logger.debug(" -> Login = '%s' / '%s'", login, password)
