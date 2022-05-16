@@ -1,21 +1,24 @@
 import unittest
 from mockserver import MockServer
 import telnetlib
+import logging
 try:
     from mock import Mock
 except ImportError:
     from unittest.mock import Mock
 
+import nut2
 from nut2 import PyNUTClient, PyNUTError
 
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        self.client = PyNUTClient(connect=False, debug=True)
+        nut2.logger.setLevel(logging.DEBUG)
+        self.client = PyNUTClient(connect=False)
         self.client._srv_handler = MockServer(broken=False)
-        self.broken_client = PyNUTClient(connect=False, debug=True)
+        self.broken_client = PyNUTClient(connect=False)
         self.broken_client._srv_handler = MockServer(broken=True)
-        self.not_ok_client = PyNUTClient(connect=False, debug=True)
+        self.not_ok_client = PyNUTClient(connect=False)
         self.not_ok_client._srv_handler = MockServer(ok=False,
                 broken=False)
         self.valid = "test"
@@ -45,7 +48,7 @@ class TestClient(unittest.TestCase):
 
     def test_connect_debug(self):
         try:
-            PyNUTClient(debug=True)
+            PyNUTClient()
         except Exception:
             assert(False)
 
@@ -57,8 +60,7 @@ class TestClient(unittest.TestCase):
 
     def test_connect_credentials(self):
         try:
-            PyNUTClient(login=self.valid, password=self.valid,
-                    debug=True)
+            PyNUTClient(login=self.valid, password=self.valid)
         except TypeError:
             pass
         except PyNUTError:
@@ -69,8 +71,7 @@ class TestClient(unittest.TestCase):
     def test_connect_credentials_username_ok(self):
         try:
             telnetlib.Telnet = MockServer
-            PyNUTClient(login=self.valid, password=self.valid,
-                    debug=True)
+            PyNUTClient(login=self.valid, password=self.valid)
         except TypeError:
             pass
         except PyNUTError:
@@ -229,7 +230,7 @@ class TestClient(unittest.TestCase):
                 self.valid, self.valid)
 
     def test_list_enum(self):
-        self.assertEquals(self.client.list_enum(self.valid, self.valid), 
+        self.assertEquals(self.client.list_enum(self.valid, self.valid),
                 [self.valid_desc])
 
     def test_list_enum_broken(self):
@@ -237,7 +238,7 @@ class TestClient(unittest.TestCase):
                 self.valid, self.valid)
 
     def test_list_range(self):
-        self.assertEquals(self.client.list_range(self.valid, self.valid), 
+        self.assertEquals(self.client.list_range(self.valid, self.valid),
                 [self.valid_desc])
 
     def test_list_range_broken(self):
@@ -245,7 +246,7 @@ class TestClient(unittest.TestCase):
                 self.valid, self.valid)
 
     def test_var_type(self):
-        self.assertEquals(self.client.var_type(self.valid, self.valid), 
+        self.assertEquals(self.client.var_type(self.valid, self.valid),
                 "RW STRING:3")
 
     def test_var_type_broken(self):
